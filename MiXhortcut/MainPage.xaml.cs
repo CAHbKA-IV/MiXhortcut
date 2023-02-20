@@ -18,6 +18,9 @@ using Windows.UI.Popups;
 using Windows.UI.StartScreen;
 using static System.Net.WebRequestMethods;
 using Windows.ApplicationModel.Preview.Holographic;
+using Windows.UI.ViewManagement;
+using Windows.Graphics.Display;
+using System.Diagnostics;
 
 // Документацию по шаблону элемента "Пустая страница" см. по адресу https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x419
 
@@ -33,6 +36,22 @@ namespace MiXhortcut
         public MainPage()
         {
             this.InitializeComponent();
+
+            StorageFolder storageFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
+            new StreamWriter(storageFolder.Path + "\\AppDB.dat", true).Close(); // Если файла ещё нет - создать его
+
+            StreamReader SR = new StreamReader(storageFolder.Path + "\\AppDB.dat", true);
+
+            while (!SR.EndOfStream)
+            {
+                SR.ReadLine();
+                string AppFolder1 = SR.ReadLine();
+                string AppExecutable1 = SR.ReadLine();
+                string AppArguments1 = SR.ReadLine();
+
+                ShortcutsList.Items.Add(AppExecutable1 + " " + AppArguments1 + Convert.ToChar(9) + " @ " + AppFolder1);
+            }
+            SR.Close();
         }
 
         private void TextBlock_SelectionChanged(object sender, RoutedEventArgs e)
@@ -51,46 +70,80 @@ namespace MiXhortcut
 
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
-            string tileId = GenerateTileId();
+//            string tileId = GenerateTileId();
+            string tileId = "";
+            Uri imageUri = new Uri("ms-appx:///Images/StoreLogo.png");
+            Uri modelUri = null;
+            const string SpecialFolder = "tilecontent";
 
             StorageFolder storageFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
-            StreamWriter SW = new StreamWriter(storageFolder.Path + "\\AppDB.dat", true);
+            new StreamWriter(storageFolder.Path + "\\AppDB.dat", true).Close(); // Если файла ещё нет - создать его
 
-            SW.WriteLine(tileId);
-            SW.WriteLine(AppFolder.Text);
-            SW.WriteLine(AppExecutable.Text);
-            SW.WriteLine(AppArguments.Text);
+            StreamReader SR = new StreamReader(storageFolder.Path + "\\AppDB.dat", true);
 
-            SW.Close();
-
-            const string SpecialFolder = "tilecontent";
-/*            try
+            while (!SR.EndOfStream)
             {
-                StorageFolder folder = await ApplicationData.Current.LocalFolder.CreateFolderAsync(SpecialFolder, CreationCollisionOption.OpenIfExists);
-                imageFile = await imageFile.CopyAsync(folder, tileId + "-" + imageFile.Name, NameCollisionOption.ReplaceExisting);
+                string tileId1 = SR.ReadLine();
+                string AppFolder1 = SR.ReadLine();
+                string AppExecutable1 = SR.ReadLine();
+                string AppArguments1 = SR.ReadLine();
+
+                if ((AppFolder1 == AppFolder.Text) && (AppExecutable1 == AppExecutable.Text) && (AppArguments1 == AppArguments.Text) && (AppModel.Text == "(Модель уже загружена)"))
+                {
+                    tileId = tileId1;
+//                    imageUri = new Uri($"ms-appdata:///local/{SpecialFolder}/{Uri.EscapeDataString(tileId + "-" + imageFile.Name)}");
+                    break;
+                }
             }
-            catch
+
+            SR.Close();
+
+            if (tileId == "")  // Если нет тайла с такими параметрами - дописать в файл
             {
-                // File I/O errors are reported as exceptions.
-                // rootPage.NotifyUser("Could not copy file to local storage.", NotifyType.ErrorMessage);
-                return;
-            } */
-            var imageUri = new Uri("ms-appx:///Images/StoreLogo.png");
+                tileId = GenerateTileId();
+
+
+                StreamWriter SW = new StreamWriter(storageFolder.Path + "\\AppDB.dat", true);
+
+                SW.WriteLine(tileId);
+                SW.WriteLine(AppFolder.Text);
+                SW.WriteLine(AppExecutable.Text);
+                SW.WriteLine(AppArguments.Text);
+
+                SW.Close();
+
+                ShortcutsList.Items.Add(AppExecutable.Text + " " + AppArguments.Text + Convert.ToChar(9) + " @ " + AppFolder.Text);
+
+                try
+                {
+                    StorageFolder folder = await ApplicationData.Current.LocalFolder.CreateFolderAsync(SpecialFolder, CreationCollisionOption.OpenIfExists);
+                    modelFile = await modelFile.CopyAsync(folder, tileId + ".glb", NameCollisionOption.ReplaceExisting);
+                }
+                catch
+                {
+                    // File I/O errors are reported as exceptions.
+                    // rootPage.NotifyUser("Could not copy file to local storage.", NotifyType.ErrorMessage);
+                    return;
+                }
+
+//                modelUri = new Uri($"ms-appdata:///local/{SpecialFolder}/{Uri.EscapeDataString(modelFile.Name)}");
+            }
+
+            modelUri = new Uri($"ms-appdata:///local/{SpecialFolder}/{Uri.EscapeDataString(tileId + ".glb")}");
+
+            /*            try
+                        {
+                            StorageFolder folder = await ApplicationData.Current.LocalFolder.CreateFolderAsync(SpecialFolder, CreationCollisionOption.OpenIfExists);
+                            imageFile = await imageFile.CopyAsync(folder, tileId + "-" + imageFile.Name, NameCollisionOption.ReplaceExisting);
+                        }
+                        catch
+                        {
+                            // File I/O errors are reported as exceptions.
+                            // rootPage.NotifyUser("Could not copy file to local storage.", NotifyType.ErrorMessage);
+                            return;
+                        } */
+
             //var imageUri = new Uri($"ms-appdata:///local/{SpecialFolder}/{Uri.EscapeDataString(imageFile.Name)}");
-
-            try
-            {
-                StorageFolder folder = await ApplicationData.Current.LocalFolder.CreateFolderAsync(SpecialFolder, CreationCollisionOption.OpenIfExists);
-                modelFile = await modelFile.CopyAsync(folder, tileId + "-" + modelFile.Name, NameCollisionOption.ReplaceExisting);
-            }
-            catch
-            {
-                // File I/O errors are reported as exceptions.
-                // rootPage.NotifyUser("Could not copy file to local storage.", NotifyType.ErrorMessage);
-                return;
-            }            
-
-            var modelUri = new Uri($"ms-appdata:///local/{SpecialFolder}/{Uri.EscapeDataString(modelFile.Name)}");
 
             var tile = new SecondaryTile(
                     tileId, // TileId
@@ -112,6 +165,8 @@ namespace MiXhortcut
                 AppExecutable.Text = "";
                 AppFolder.Text = "";
                 AppArguments.Text = "";
+
+                ShortcutsList.SelectedIndex = 0;
             }
         }
 
@@ -194,6 +249,80 @@ namespace MiXhortcut
             }
 
             AppFolder.Text = folder.Path;
+        }
+
+        private void rootPage_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ShortcutsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            int index = 0;
+
+            StorageFolder storageFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
+            new StreamWriter(storageFolder.Path + "\\AppDB.dat", true).Close(); // Если файла ещё нет - создать его
+
+            StreamReader SR = new StreamReader(storageFolder.Path + "\\AppDB.dat", true);
+
+            while (!SR.EndOfStream)
+            {
+                string tileId1 = SR.ReadLine();
+                string AppFolder1 = SR.ReadLine();
+                string AppExecutable1 = SR.ReadLine();
+                string AppArguments1 = SR.ReadLine();
+
+                if (index == ShortcutsList.SelectedIndex)
+                {
+                    AppModel.Text = "(Модель уже загружена)";
+
+                    AppExecutable.Text = AppExecutable1;
+                    AppFolder.Text = AppFolder1;
+                    AppArguments.Text = AppArguments1;
+                    break;
+                }
+
+                index++;
+            }
+            SR.Close();
+        }
+
+        async private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            if (ShortcutsList.SelectedIndex == -1) return;
+
+            int index = 0;
+
+            StorageFolder storageFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
+            new StreamWriter(storageFolder.Path + "\\AppDB.dat", true).Close(); // Если файла ещё нет - создать его
+
+            StreamReader SR = new StreamReader(storageFolder.Path + "\\AppDB.dat", true);
+            StreamWriter SW = new StreamWriter(storageFolder.Path + "\\Temporary.dat", false);
+
+            while (!SR.EndOfStream)
+            {
+                string tileId1 = SR.ReadLine();
+                string AppFolder1 = SR.ReadLine();
+                string AppExecutable1 = SR.ReadLine();
+                string AppArguments1 = SR.ReadLine();
+
+                if (index != ShortcutsList.SelectedIndex)
+                {
+                    SW.WriteLine(tileId1);
+                    SW.WriteLine(AppFolder1);
+                    SW.WriteLine(AppExecutable1);
+                    SW.WriteLine(AppArguments1);
+                }
+
+                index++;
+            }
+            SR.Close();
+            SW.Close();
+            ShortcutsList.Items.Remove(ShortcutsList.Items[ShortcutsList.SelectedIndex]);
+
+            
+            var FD = await storageFolder.GetFileAsync("Temporary.dat");
+            await FD.CopyAsync(storageFolder, "AppDB.dat", NameCollisionOption.ReplaceExisting);
         }
     }
 }

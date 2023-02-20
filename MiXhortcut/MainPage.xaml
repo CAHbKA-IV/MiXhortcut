@@ -6,30 +6,32 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" d:DesignWidth="299.5" d:DesignHeight="395">
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Width="757" Loaded="rootPage_Loaded" Height="383">
 
-    <Grid VerticalAlignment="Top" Margin="0,0,10,0">
-        <TextBlock HorizontalAlignment="Left" Margin="10,47,0,0" TextWrapping="Wrap" Text="Исполняемый файл" VerticalAlignment="Top"/>
-        <TextBox x:Name="AppExecutable" Margin="10,66,35,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" TextChanged="TextBox_TextChanged_1">
+    <Grid Margin="10,10,10,10">
+        <TextBlock Margin="0,0,0,0" Text="Создание ярлыка" FontSize="20" FontWeight="Bold" VerticalAlignment="Top"/>
+        <TextBlock Margin="448,42,0,0" Text="Исполняемый файл" VerticalAlignment="Top"/>
+        <TextBox x:Name="AppExecutable" Margin="448,66,35,0" Text="" VerticalAlignment="Top" TextChanged="TextBox_TextChanged_1">
             <TextBox.Background>
                 <SolidColorBrush Color="{ThemeResource SystemAltHighColor}"/>
             </TextBox.Background>
         </TextBox>
         <Button x:Name="PickExecutable" Content="..." Margin="0,66,0,0" VerticalAlignment="Top" Width="30" HorizontalAlignment="Right" Click="PickExecutable_Click"/>
-        <TextBlock HorizontalAlignment="Left" Margin="10,115,0,0" TextWrapping="Wrap" Text="Рабочая папка" VerticalAlignment="Top"/>
-        <TextBox x:Name="AppFolder" Margin="10,134,37,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top">
+        <TextBlock Margin="448,110,0,0"  Text="Рабочая папка" VerticalAlignment="Top"/>
+        <TextBox x:Name="AppFolder" Margin="448,134,37,0" Text="" VerticalAlignment="Top">
             <TextBox.Background>
                 <SolidColorBrush Color="{ThemeResource SystemAltHighColor}"/>
             </TextBox.Background>
         </TextBox>
         <Button x:Name="PickFolder" Content="..." Margin="0,134,0,0" VerticalAlignment="Top" Width="30" HorizontalAlignment="Right" Click="PickFolder_Click"/>
-        <TextBlock HorizontalAlignment="Left" Margin="10,183,0,0" TextWrapping="Wrap" Text="Аргументы командной строки" VerticalAlignment="Top"/>
-        <TextBox x:Name="AppArguments" Margin="10,202,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top"/>
-        <TextBlock HorizontalAlignment="Left" Margin="10,251,0,0" TextWrapping="Wrap" Text="3D-модель для виртуального дома" VerticalAlignment="Top"/>
-        <TextBox x:Name="AppModel" Margin="10,270,35,0" TextWrapping="Wrap" Text="Ничего не выбрано" VerticalAlignment="Top" IsEnabled="False">
+        <TextBlock Margin="448,178,0,0" Text="Аргументы командной строки" VerticalAlignment="Top"/>
+        <TextBox x:Name="AppArguments" Margin="448,202,0,0" Text="" VerticalAlignment="Top"/>
+        <TextBlock Margin="448,246,0,0" Text="3D-модель для виртуального дома" VerticalAlignment="Top"/>
+        <TextBox x:Name="AppModel" Margin="448,270,35,0" Text="Ничего не выбрано" VerticalAlignment="Top" IsEnabled="False">
         </TextBox>
         <Button x:Name="PickModel" Content="..." Margin="0,270,0,0" VerticalAlignment="Top" Width="30" HorizontalAlignment="Right" Click="PickModel_Click"/>
-        <Button x:Name="CreateShortcut" Content="Создать ярлык" Height="32" Margin="0,351,0,0" VerticalAlignment="Top" Width="200" HorizontalAlignment="Center" Click="Button_Click"/>
-        <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Создание ярлыка" VerticalAlignment="Top" FontSize="20" FontWeight="Bold"/>
+        <ListView x:Name="ShortcutsList" Margin="0,42,0,62" SelectionChanged="ShortcutsList_SelectionChanged" RequestedTheme="Default" Width="430" HorizontalAlignment="Left"/>
+        <Button x:Name="RemoveFromList" Content="Удалить из списка" Height="32" VerticalAlignment="Bottom" Width="180" Click="Button_Click_1" HorizontalAlignment="Left"/>
+        <Button x:Name="CreateShortcut" Content="Создать ярлык" Height="32" Margin="190,0,0,0" VerticalAlignment="Bottom" Width="180" Click="Button_Click" HorizontalAlignment="Left"/>
     </Grid>
 </Page>
