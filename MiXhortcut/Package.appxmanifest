@@ -8,7 +8,7 @@
 
   <Identity
     Name="b299093e-ef42-4b27-96e5-36c455b84f39"
-    Publisher="CN=civ"
+    Publisher="CN=Санька Четвёртый"
     Version="1.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="b299093e-ef42-4b27-96e5-36c455b84f39" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
